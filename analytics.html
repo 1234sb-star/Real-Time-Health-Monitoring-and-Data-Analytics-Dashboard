@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .nav {
+            text-align: center;
+            margin: 10px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: white;
+            margin: 0 10px;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+
+        .nav a:hover {
+            background: white;
+            color: black;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+            margin-top: 20px;
+        }
+
+        .chart-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 600px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    📊 Detailed Analytics Dashboard
+</div>
+
+<div class="nav">
+    <a href="/">🏠 Dashboard</a>
+    <a href="/report">📄 Report</a>
+</div>
+
+<div class="container">
+
+    <div class="chart-box">
+        <canvas id="chart1"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <canvas id="chart2"></canvas>
+    </div>
+
+</div>
+
+<script>
+let labels = [];
+let heartData = [];
+let stepsData = [];
+
+let chart1 = new Chart(document.getElementById("chart1"), {
+    type: "line",
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Heart Rate",
+            data: heartData,
+            borderColor: "red",
+            backgroundColor: "rgba(255,0,0,0.2)",
+            fill: true
+        }]
+    }
+});
+
+let chart2 = new Chart(document.getElementById("chart2"), {
+    type: "bar",
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Steps",
+            data: stepsData,
+            backgroundColor: "blue"
+        }]
+    }
+});
+
+async function fetchData() {
+    let res = await fetch("/data");
+    let d = await res.json();
+
+    labels.push(new Date().toLocaleTimeString());
+    heartData.push(d.heart_rate);
+    stepsData.push(d.steps);
+
+    if (labels.length > 10) {
+        labels.shift();
+        heartData.shift();
+        stepsData.shift();
+    }
+
+    chart1.update();
+    chart2.update();
+}
+
+setInterval(fetchData, 3000);
+</script>
+
+</body>
+</html>
